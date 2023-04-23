@@ -1,0 +1,13 @@
+[
+  {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "centrality",
+      "tweets_500_all"
+    ],
+    "target": "speed_kph_mean",
+    "predict": "True"
+  }
+]

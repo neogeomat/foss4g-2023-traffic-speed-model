@@ -1,0 +1,40 @@
+{
+  "output_dir": "/Users/cludwig/Development/sm2t/sm2t-traffic-speed-model/data/results",
+  "twitter_dir": "/Users/cludwig/Data/sds/sd17f001/SM2T/COPY-TO-GLOBUS/tweet-data/2018-01-01T00-00-00Z_2020-03-31T23-59-59Z",
+  "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data",
+  "aois": {
+    "berlin": {
+      "timezone": "Europe/Berlin"
+    },
+    "nairobi": {
+      "timezone": "Africa/Nairobi"
+    },
+    "seattle": {
+      "timezone": "US/Pacific"
+    },
+    "kyiv": {
+      "timezone": "Europe/Kiev"
+    },
+    "london": {
+      "timezone": "Europe/London"
+    },
+    "madrid": {
+      "timezone": "Europe/Madrid"
+    },
+    "barcelona": {
+      "timezone": "Europe/Madrid"
+    },
+    "new-york-city": {
+      "timezone": "US/Eastern"
+    },
+    "san-francisco": {
+      "timezone": "US/Pacific"
+    },
+    "cincinnati": {
+      "timezone": "US/Eastern"
+    },
+    "sao-paulo": {
+      "timezone": "America/Sao_Paulo"
+    }
+  }
+}

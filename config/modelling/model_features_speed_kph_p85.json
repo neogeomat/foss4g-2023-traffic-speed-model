@@ -1,0 +1,72 @@
+[
+  {
+    "features": [
+      "highway"
+    ],
+    "target": "speed_kph_p85"
+  },
+  {
+    "features": [
+      "highway",
+      "maxspeed"
+    ],
+    "target": "speed_kph_p85"
+  },
+  {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour"
+    ],
+    "target": "speed_kph_p85"
+  },
+  {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "centrality"
+    ],
+    "target": "speed_kph_p85"
+  },
+  {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "centrality",
+      "tweets_250_hour"
+    ],
+    "target": "speed_kph_p85"
+  },
+  {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "centrality",
+      "tweets_250_all"
+    ],
+    "target": "speed_kph_p85"
+  },
+    {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "tweets_250_all"
+    ],
+    "target": "speed_kph_p85"
+  },
+    {
+    "features": [
+      "highway",
+      "maxspeed",
+      "hour",
+      "centrality",
+      "tweets_500_all"
+    ],
+    "target": "speed_kph_p85",
+      "predict": "True"
+  }
+]

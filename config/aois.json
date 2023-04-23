@@ -1,0 +1,68 @@
+{
+  "berlin": {
+    "timezone": "Europe/Berlin",
+    "output_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/extracted/berlin",
+    "twitter_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/twitter/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/uber"
+  },
+  "nairobi": {
+    "timezone": "Africa/Nairobi",
+    "output_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/extracted/nairobi",
+    "twitter_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/twitter/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/uber"
+  },
+  "seattle": {
+    "timezone": "US/Pacific",
+    "output_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/extracted/seattle",
+    "twitter_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/twitter/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/uber"
+  },
+  "kyiv": {
+    "timezone": "Europe/Kiev",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/kyiv",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "london": {
+    "timezone": "Europe/London",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/london",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "madrid": {
+    "timezone": "Europe/Madrid",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/madrid",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "barcelona": {
+    "timezone": "Europe/Madrid",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/barcelona",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "new-york-city": {
+    "timezone": "US/Eastern",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/new-york-city",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "san-francisco": {
+    "timezone": "US/Pacific",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/san-francisco",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "cincinnati": {
+    "timezone": "US/Eastern",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/cincinnati",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  },
+  "sao-paulo": {
+    "timezone": "America/Sao_Paulo",
+    "output_dir": "/data/SM2T_data/targeted_centrality/sm2t-centrality/data/interim/sao-paulo",
+    "twitter_dir": "/data/SM2T_data/targeted_centrality/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/data/SM2T_data/targeted_centrality/data/uber-movement-quarterly-data"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "berlin": {
+    "timezone": "Europe/Berlin",
+    "output_dir": "/Users/cludwig/Development/sm2t/sm2t-traffic-speed-model/data",
+    "twitter_dir": "/Users/cludwig/Development/sm2t/sm2t-traffic-speed-model/data/tweet-data-grid-timebins-weekend",
+    "uber_dir": "/Users/cludwig/Data/sds/sd17f001/SM2T/COPY-TO-GLOBUS/uber-movement-data/berlin-germany"
+  }
+}
