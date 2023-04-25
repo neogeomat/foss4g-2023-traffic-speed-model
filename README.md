@@ -1,7 +1,5 @@
 # Traffic Speed Modelling using OpenStreetmap and Twitter data 
 
-## Description
-
 The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper:
 
 C. Ludwig, J. Psotta, A. Buch, N. Kolaxidis, S. Fendrich, M. Zia, J. Fürle, A. Rousell, A. Zipf (2023): **Traffic speed modelling to improve travel speed estimation in openrouteservice.** FOSS4G 2023, Prizren, 26 June - 2 July 2023.
