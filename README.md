@@ -1,4 +1,4 @@
-# Traffic Speed Modelling using OpenStreetmap and Twitter data 
+# Traffic Speed Modelling using OpenStreetmap and Twitter data
 
 The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper:
 
@@ -95,7 +95,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Authors
 
 - Christina Ludwig
-- Nikolaos Kolaxidis
+- Anna Buch
 
 
 ## Acknowledgments
