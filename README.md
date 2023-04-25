@@ -7,6 +7,7 @@ C. Ludwig, J. Psotta, A. Buch, N. Kolaxidis, S. Fendrich, M. Zia, J. Fürle, A. 
 ## Dependencies
 
 - Python >= 3.10
+- poetry >=1.3.2
 - docker
 - gunzip
 
@@ -89,7 +90,13 @@ If you want to run the export for several config files at once, you can use the 
 
 ## License
 
-This project is licensed under the [GPL3] License - see the LICENSE.md file for details
+This project is licensed under the MIT License - see the LICENSE file for details
+
+## Authors
+
+- Christina Ludwig
+- Nikolaos Kolaxidis
+
 
 ## Acknowledgments
 
