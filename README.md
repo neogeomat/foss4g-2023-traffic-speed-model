@@ -4,6 +4,8 @@
 
 The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper:
 
+C. Ludwig, J. Psotta, A. Buch, N. Kolaxidis, S. Fendrich, M. Zia, J. Fürle, A. Rousell, A. Zipf (2023): **Traffic speed modelling to improve travel speed estimation in openrouteservice.** FOSS4G 2023, Prizren, 26 June - 2 July 2023.
+
 ## Dependencies
 
 - Python >= 3.10
@@ -47,7 +49,7 @@ gunzip < preprocessed_2023-04-25_12_29_03.gz | docker exec -i db-traffic-speed-m
 
 `docker exec -t db-traffic-speed-model pg_dumpall -c -U postgres | gzip > ./preprocessed_$(date +"%Y-%m-%d_%H_%M_%S").gz`
 
-### Running the analysis
+## Running the analysis
 
 
 #### 1. Preprocessing (optional)
