@@ -1,4 +1,4 @@
-# Traffic Speed Model
+# Traffic Speed Modelling using OpenStreetmap and Twitter data 
 
 ## Description
 
