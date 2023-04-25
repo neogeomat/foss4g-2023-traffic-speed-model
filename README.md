@@ -2,13 +2,13 @@
 
 ## Description
 
-The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper: 
+The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper:
 
 ## Dependencies
 
 - Python >= 3.10
 - docker
-- gunzip 
+- gunzip
 
 ## Preparation
 
@@ -32,18 +32,18 @@ cd foss4g-2023-traffic-speed-model
 docker compose up -d
 ```
 
-#### 3. Load preprocessed data into database 
+#### 3. Load preprocessed data into database
 
 1. Download the preprocessed input data from [Zenodo](https://zenodo.org/record/7857038#.ZEetIXbP0qs) and store it in the directory `./db-backup`.
 
-2. Load the preprocessed data into the database (this may take a while) 
+2. Load the preprocessed data into the database (this may take a while)
 
 ```
 cd foss4g-2023-traffic-speed-model/db-backup
 gunzip < preprocessed_2023-04-25_12_29_03.gz | docker exec -i db-traffic-speed-model psql -U postgres -d postgres`
 ```
 
-#### Optional: Create a backup of the database 
+#### Optional: Create a backup of the database
 
 `docker exec -t db-traffic-speed-model pg_dumpall -c -U postgres | gzip > ./preprocessed_$(date +"%Y-%m-%d_%H_%M_%S").gz`
 
@@ -52,11 +52,11 @@ gunzip < preprocessed_2023-04-25_12_29_03.gz | docker exec -i db-traffic-speed-m
 
 #### 1. Preprocessing (optional)
 
-To reproduce the results of the paper this step is not necessary if you have [loaded the preprocessed data into the database](#load-preprocessed-data). This step only needs to be performed if you are using new data which is not yet in the database. 
+To reproduce the results of the paper this step is not necessary if you have [loaded the preprocessed data into the database](#load-preprocessed-data). This step only needs to be performed if you are using new data which is not yet in the database.
 
-#### 2. Train the models 
+#### 2. Train the models
 
-Adjust the file paths in the config file [./config/config_aois_allcities](./config/config_aois_allcities). The model parameters are defined in [./config/modelling](./config/modelling). These do not have to be adjusted to reproduce the results. 
+Adjust the file paths in the config file [./config/config_aois_allcities](./config/config_aois_allcities). The model parameters are defined in [./config/modelling](./config/modelling). These do not have to be adjusted to reproduce the results.
 
 **Example:** Run model training for Nairobi with target variabel 85th percentile traffic speed
 
@@ -76,9 +76,9 @@ If you want to run the prediction for several config files at once, you can use 
 
 `./batch_prediction.sh nairobi`
 
-#### 4. Export traffic speed from database for openrouteservice 
+#### 4. Export traffic speed from database for openrouteservice
 
-To export the predicted traffic speed data run: 
+To export the predicted traffic speed data run:
 
 `python ./export.py -a nairobi -t speed_kph_p85 -c ../config/config_aois_allcities.json`
 
