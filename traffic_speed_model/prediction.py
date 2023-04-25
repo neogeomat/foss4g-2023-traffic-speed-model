@@ -140,7 +140,7 @@ def predict_speed(filepaths, aoi_name: str, model_config_file: str):
             model_file = model_evaluation_dir / f"{model_name}.joblib"
             logger.info(f"Found model file: {model_file}")
             trained_model = joblib.load(model_file)
-            logger.info(f"Predicting traffic speed...")
+            logger.info("Predicting traffic speed...")
             feature_names_model = trained_model.feature_names_in_
             y_pred = trained_model.predict(features.loc[:, feature_names_model])
 
@@ -152,7 +152,7 @@ def predict_speed(filepaths, aoi_name: str, model_config_file: str):
                     "hour_of_day": features.hour_org.astype(int),
                 },
             )
-            logger.info(f"Saving modelled traffic speed to database...")
+            logger.info("Saving modelled traffic speed to database...")
             pred_df.to_sql(
                 f"{target}_modelled_{aoi_name.replace('-', '_')}",
                 engine,

@@ -49,7 +49,7 @@
     ],
     "target": "speed_kph_p85"
   },
-    {
+  {
     "features": [
       "highway",
       "maxspeed",
@@ -58,7 +58,7 @@
     ],
     "target": "speed_kph_p85"
   },
-    {
+  {
     "features": [
       "highway",
       "maxspeed",
@@ -67,6 +67,6 @@
       "tweets_500_all"
     ],
     "target": "speed_kph_p85",
-      "predict": "True"
+    "predict": "True"
   }
 ]

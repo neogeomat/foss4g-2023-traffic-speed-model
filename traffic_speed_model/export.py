@@ -35,9 +35,12 @@ def table_to_csv(city, target, outfile):
     engine = get_engine_from_environment()
     data = pd.read_sql(sql, con=engine)
     data["year"] = 2020
-    data.rename(columns={target: "speed_kph_p85"}, inplace=True) # needs to be renamed because this is the column name expected by ORS
+    data.rename(
+        columns={target: "speed_kph_p85"}, inplace=True
+    )  # needs to be renamed because this is the column name expected by ORS
     data.drop("fid", axis=1, inplace=True)
     data.to_csv(outfile, index=False)
+
 
 def uber_table_to_csv(city, target, outfile):
     """Create view of polygons and green beliefs"""
@@ -50,12 +53,19 @@ def uber_table_to_csv(city, target, outfile):
     engine = get_engine_from_environment()
     data = pd.read_sql(sql, con=engine)
     data["year"] = 2020
-    data.rename(columns={target: "speed_kph_p85", 'hour': 'hour_of_day'}, inplace=True) # needs to be renamed because this is the column name expected by ORS
+    data.rename(
+        columns={target: "speed_kph_p85", "hour": "hour_of_day"}, inplace=True
+    )  # needs to be renamed because this is the column name expected by ORS
     data.to_csv(outfile, index=False)
 
 
-
 def export_for_ors(city: str, target: str, results_dir: str):
+    """
+    Exports traffic speed data from database into a csv file compatible with openrouteservice
+    :param: city: Name of the city
+    :param: target: Name of target variable, e.g. speed_kph_p50, speed_kph_mean, speed_kph_p85 or uber
+    :param: results_dir: Path to output directory
+    """
     output_dir = Path(results_dir) / city / "model" / "prediction" / target
     output_dir.mkdir(exist_ok=True)
     if target != "uber":

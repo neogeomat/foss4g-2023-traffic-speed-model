@@ -11,13 +11,12 @@ import os
 import sys
 from dotenv import load_dotenv
 
-from preprocessing.uber import preprocess_uber
-
 os.chdir(sys.path[0])
 from utils import FilePaths, init_logger, load_config
 from preprocessing.centrality import preprocess_centrality
-from preprocessing.twitter_points import preprocess_twitter
+from preprocessing.twitter import preprocess_twitter
 from preprocessing.edges import preprocess_edges
+from preprocessing.uber import preprocess_uber
 
 load_dotenv("../.env")
 
@@ -45,8 +44,6 @@ if __name__ == "__main__":
 
     aoi_name = args.aoi_name
     config_file = args.config_file
-    # aoi_name = "nairobi"
-    # config_file = "../config/aois.json"
 
     # Set modules to be executed to True
     run_preprocess_edges = False

@@ -8,6 +8,10 @@ __email__ = "christina.ludwig@uni-heidelberg.de"
 import geopandas as gpd
 import pandas as pd
 from pathlib import Path
+
+import utm
+from pyproj import CRS
+from shapely import Point
 from sqlalchemy.types import Integer, BigInteger
 import sqlalchemy
 from shapely.geometry import box
@@ -20,29 +24,39 @@ import pytz
 logger = init_logger("preprocess-twitter")
 
 
-def convert_utc_to_local(twitter_tiles: pd.DataFrame, timezone_name: str):
+def convert_utc_to_local(twitter_df: pd.DataFrame, timezone_name: str):
     """
     Converts utc timestamp to local time
     :param twitter_tiles: Dataframe containing twitter tile data
     :param timezone_name: Local time zone name
     :return:
     """
-
     local_timezone = pytz.timezone(timezone_name)
-
-    twitter_tiles["timestamp"] = twitter_tiles["hour"].map(
-        lambda x: dt.datetime(year=2020, month=7, day=1, hour=x, tzinfo=pytz.utc)
+    twitter_df["timestamp"] = pd.to_datetime(
+        twitter_df["createdAT"].map(lambda x: x["$date"])
     )
-    twitter_tiles["timestamp"] = twitter_tiles["timestamp"].dt.tz_convert(
+    twitter_df["timestamp_local"] = twitter_df["timestamp"].dt.tz_convert(
         local_timezone
     )
-    twitter_tiles["hour"] = (
-        twitter_tiles["timestamp"].map(lambda x: x.hour).astype("int")
-    )
-    return twitter_tiles
+    twitter_df["hour"] = twitter_df["timestamp"].map(lambda x: x.hour).astype("int")
+    return twitter_df
 
 
-def preprocess_twitter(filepaths, twitter_dir, timezone_name, aoi_name):
+def get_utm_zone(geometry):
+    """Reproject a dataframe with epsg:4326 to UTM in respective zone
+    Reprojects a dataframe to UTM
+    :param aoifile: Path to AOI file
+    :return:
+    """
+    center = geometry.centroid
+    utm_zone = utm.from_latlon(center.y, center.x)
+    hemisphere = "south" if utm_zone[3] in "CDEFGHJKLM" else "north"
+    proj4_string = f"+proj=utm +zone={utm_zone[2]} +{hemisphere}"
+    crs = CRS.from_string(proj4_string)
+    return crs.to_epsg()
+
+
+def preprocess_twitter(twitter_dir, timezone_name, aoi_name):
     """
     Preprocess twitter data
     :return:
@@ -54,88 +68,68 @@ def preprocess_twitter(filepaths, twitter_dir, timezone_name, aoi_name):
         f"SELECT fid, geometry FROM edges_{aoi_name.replace('-', '_')}",
         engine,
         geom_col="geometry",
-    ).set_index("fid")
+    )
+    utmzone = get_utm_zone(edges.geometry[0])
+    edges = edges.to_crs(utmzone)
 
-    twitter_dir = Path(twitter_dir)
+    # read twitter data
+    twitter_file = (
+        Path(twitter_dir) / f"{aoi_name}-2018-01-01T00-00-00Z_2020-03-31T23-59-59Z.json"
+    )
+    twitter_df = pd.read_json(twitter_file, lines=True)
+    twitter_df = twitter_df[["coords", "createdAT"]]
+    twitter_df = convert_utc_to_local(twitter_df, timezone_name)
+    twitter_df["geometry"] = twitter_df.coords.map(lambda x: Point(x))
+    twitter_df = gpd.GeoDataFrame(twitter_df, crs="epsg:4326")
+    twitter_df = twitter_df.to_crs(utmzone)
+    twitter_df.drop(
+        ["coords", "createdAT", "timestamp", "timestamp_local"], axis=1, inplace=True
+    )
+    twitter_df.hour = twitter_df.hour.astype("int")
 
-    resolutions = ["50m", "100m", "500m", "1000m"]
+    resolutions = [500, 50, 100, 250]
     for i, r in enumerate(resolutions):
         logger.info(f"Processing {r} grid...")
-        found = list(twitter_dir.glob(f"{aoi_name}*{r}.csv"))
-        if len(found) == 0:
-            logger.warning(f"No {r} file found.")
-            continue
-        logger.info(f"Processing {found[0]}")
-        twitter_tiles = pd.read_csv(found[0])
 
-        # Remove weekend and sum tweets for each grid cell from weekends and weekdays
-        twitter_tiles.drop("weekendBool", axis=1, inplace=True)
-        twitter_tiles = (
-            twitter_tiles.groupby(["xMin", "yMin", "xMax", "yMax", "hour"])
-            .sum()
-            .reset_index()
-        )
-
-        # Convert hour to local time zone
-        twitter_tiles = convert_utc_to_local(twitter_tiles, timezone_name)
-
-        # Use 3 hour interval (was a test but did not yield better results in the model)
-        # data_3H = data.groupby(['xMin', 'yMin', 'xMax', 'yMax', 'weekendBool', pd.Grouper(key='timestamp', freq='3H', label="right")]).sum()
-        # data_3H.reset_index(inplace=True)
-        # data_3H["hour"] = data_3H.timestamp.map(lambda x: x.hour)
-        # data = data_3H
-
-        # Create shapely geometries from bounding box coordinates
-        twitter_tiles["geometry"] = twitter_tiles.apply(
-            lambda x: box(x["xMin"], x["yMin"], x["xMax"], x["yMax"]), axis=1
-        )
-        twitter_tiles = gpd.GeoDataFrame(twitter_tiles, crs="epsg:4326")
+        edges_buffered = edges.copy()
+        edges_buffered.geometry = edges_buffered.buffer(r)
 
         # Join edges and twitter tiles
-        edges_twitter = gpd.sjoin(edges, twitter_tiles, how="left")
+        logger.info("Performing spatial join ...")
+        edges_twitter = gpd.sjoin(edges_buffered, twitter_df, how="left").drop(
+            ["geometry", "index_right"], axis=1
+        )
 
         # Tweets per hour
-        tweets_per_edge_hour = (
-            edges_twitter.reset_index().groupby(["fid", "hour"])["tweetSum"].mean()
-        )
-        tweets_per_edge_hour.rename(f"tweets_{r}_hour", inplace=True)
-        tweets_per_edge_hour = pd.DataFrame(tweets_per_edge_hour)
+        logger.info("Calculating tweets per hour ...")
+        twitter_hour = edges_twitter.groupby(["fid", "hour"]).count()[["timestamp"]]
+        twitter_hour.rename(columns={"timestamp": f"tweets_{r}_hour"}, inplace=True)
 
-        # Tweets per day
-        tweets_per_edge_day = (
-            tweets_per_edge_hour.reset_index()
-            .groupby(["fid"])
-            .sum()[[f"tweets_{r}_hour"]]
-        )
-        tweets_per_edge_day.rename(
-            columns={f"tweets_{r}_hour": f"tweets_{r}_day"}, inplace=True
-        )
+        # All Tweets
+        logger.info("Calculating tweets total ...")
+        twitter_all = edges_twitter.groupby(["fid"]).count()[["timestamp"]]
+        twitter_all.rename(columns={"timestamp": f"tweets_{r}_all"}, inplace=True)
 
-        # Merge tweets per hour and per day
-        tweet_features = tweets_per_edge_hour.join(tweets_per_edge_day, how="left")
-        tweet_features = tweet_features.reset_index().set_index(["fid", "hour"])
+        logger.info("Joining data with previous results ...")
+        if i == 0:
+            twitter_hour_all = twitter_hour
+        else:
+            twitter_hour_all = twitter_hour_all.join(twitter_hour, how="outer")
 
         if i == 0:
-            all_proxies = tweet_features
+            twitter_all_all = twitter_all
         else:
-            all_proxies = all_proxies.join(tweet_features, how="outer")
+            twitter_all_all = twitter_all_all.join(twitter_all, how="outer")
 
-    # Twitter city count
-    twitter_total_highway = twitter_tiles.groupby("hour").sum()["tweetSum"]
-    twitter_total_highway.name = "tweets_city"
-    all_proxies = all_proxies.reset_index().join(
-        twitter_total_highway, on="hour", how="left"
-    )
+    # Set 0 as tweet count for highway segments with NAN
+    logger.info("Filling nan values ...")
 
-    all_proxies.fillna(0, inplace=True)
+    twitter_hour_all.fillna(0, inplace=True)
+    twitter_all_all.fillna(0, inplace=True)
 
-    navalues = all_proxies.isna().sum(axis=0)
-    if any(navalues > 0) > 0:
-        logger.warning("There are still NA values in twitter features.")
-
-    logger.info("Writing to file...")
-    all_proxies.to_sql(
-        f"twitter_{aoi_name.replace('-', '_')}",
+    logger.info("Writing to database...")
+    twitter_hour_all.to_sql(
+        f"twitter_by_hour_{aoi_name.replace('-', '_')}",
         engine,
         if_exists="replace",
         index=True,
@@ -144,55 +138,24 @@ def preprocess_twitter(filepaths, twitter_dir, timezone_name, aoi_name):
             "fid": BigInteger(),
             "hour": Integer(),
             "tweets_50m_hour": Integer(),
-            "tweets_50m_day": Integer(),
             "tweets_100m_hour": Integer(),
-            "tweets_100m_day": Integer(),
             "tweets_500m_hour": Integer(),
-            "tweets_500m_day": Integer(),
             "tweets_1000m_hour": Integer(),
-            "tweets_1000m_day": Integer(),
-            "tweets_city": BigInteger(),
         },
     )
 
-
-if __name__ == "__main__":
-    aoi_dir = "/Users/chludwig/Development/sm2t/sm2t_centrality/data/extracted/seattle"
-    twitter_dir = "/Users/chludwig/Development/sm2t/sm2t_centrality/data/twitter/tweet-data-grid-timebins-weekend"
-    timezone_name = "US/Pacific"
-
-    """
-    parser = argparse.ArgumentParser(
-        description="Preprocess uber data"
+    logger.info("Writing to database...")
+    twitter_all_all.to_sql(
+        f"twitter_all_{aoi_name.replace('-', '_')}",
+        engine,
+        if_exists="replace",
+        index=True,
+        chunksize=50000,
+        dtype={
+            "fid": BigInteger(),
+            "tweets_50m_all": Integer(),
+            "tweets_100m_all": Integer(),
+            "tweets_500m_all": Integer(),
+            "tweets_1000m_all": Integer(),
+        },
     )
-    parser.add_argument(
-        "--aoi_dir",
-        "-a",
-        required=True,
-        dest="aoi_dir",
-        type=str,
-        help="AOI directory",
-    )
-    parser.add_argument(
-        "--twitter_dir",
-        "-t",
-        required=True,
-        dest="twitter_dir",
-        type=str,
-        help="Directory with twitter data",
-    )
-    parser.add_argument(
-        "--name",
-        "-n",
-        required=True,
-        dest="name",
-        type=str,
-        help="Name of twitter proxy",
-    )
-
-    args = parser.parse_args()
-    twitter_dir = args.twitter_dir
-    aoi_dir = args.aoi_dir
-    name = args.name
-    """
-    preprocess_twitter(aoi_dir, twitter_dir, timezone_name=timezone_name)
