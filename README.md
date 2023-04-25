@@ -4,8 +4,6 @@
 
 The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper: 
 
-
-
 ## Dependencies
 
 - Python >= 3.10
@@ -22,6 +20,8 @@ After you have cloned the repository, use [poetry](https://python-poetry.org) to
 cd foss4g-2023-traffic-speed-model
 poetry install
 ```
+
+To activate the environment execute `poetry shell` or run all python commands with `poetry run python ...`.
 
 #### 2. Set up PostGIS Database
 
