@@ -92,7 +92,7 @@ class FilePaths:
         """
         for var, path in self.__dict__.items():
             if str(var).endswith("_DIR"):
-                path.mkdir(parents=False, exist_ok=True)
+                path.mkdir(parents=True, exist_ok=True)
 
 
 def clean_maxspeed(maxspeed: pd.Series):
