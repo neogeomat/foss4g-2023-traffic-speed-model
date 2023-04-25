@@ -1,125 +1,91 @@
-# SM2T: Traffic Speed Model
-
-Model to predict traffic speed based on OpenStreetMap, Twitter and Uber data developed within the SocialMedia2Traffic project.
+# Traffic Speed Model
 
 ## Description
 
-The repository contains Python scripts to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. The Twitter data is preprocessed in [socialmedia2traffic-modeller](https://github.com/GIScience/socialmedia2traffic-modeller) repo, the centrality data can be produced using the code in the [https://github.com/GIScience/socialmedia2traffic-centrality](https://github.com/GIScience/socialmedia2traffic-centrality) repo.
+The repository contains the source code to model traffic speed based on OpenStreetMap and Twitter data using Uber data as reference. It was used to generate the results for the paper: 
 
-The traffic speed data produced within the SocialMedia2Traffic project is available through the [socialmedia2traffic-api](https://github.com/GIScience/socialmedia2traffic-api) for integration in [openrouteservice](https://openrouteservice.org/).
 
-## Getting Started
 
-### Dependencies
+## Dependencies
 
 - Python >= 3.10
-- PostGIS database to store data
+- docker
+- gunzip 
 
-### Installation
+## Preparation
 
-#### Python
+#### 1. Set up Python environment
 
 After you have cloned the repository, use [poetry](https://python-poetry.org) to set up a virtual environment with all required dependencies.
 
 ```
-cd sm2t_traffic_speed_model
+cd foss4g-2023-traffic-speed-model
 poetry install
 ```
 
-#### PostGIS Database
+#### 2. Set up PostGIS Database
 
 A postgis database is required to store the processed data. You can set up a database using docker:
 
 ```
-cd sm2t_traffic_speed_model
+cd foss4g-2023-traffic-speed-model
 docker compose up -d
 ```
 
-To load the preprocessed input data for all cities into the database do the following:
+#### 3. Load preprocessed data into database 
 
-0. Download the traffic_model_data.sql file and store it in the directory `./db-backup`.
+1. Download the preprocessed input data from [Zenodo](https://zenodo.org/record/7857038#.ZEetIXbP0qs) and store it in the directory `./db-backup`.
 
-1. Access the container’s shell:
-
-```docker exec -it  <container_id> bash```
-
-You get the container_id by running `docker ps`.
-
-2. Load data into the database. This may take a while.
-
-```psql -U postgres -W -f ./db-backup/traffic_model_backup.sql postgres```
-
-
-### Executing program
-
-The program contains three main procedures: Preprocessing, modelling and prediction.
-
-#### 1. [preprocessing.py](preprocessing.py)
+2. Load the preprocessed data into the database (this may take a while) 
 
 ```
-usage: preprocessing.py [-h] --aoi_dir AOI_DIR --config CONFIG_FILE
-
-Preprocessing of twitter, uber and centrality data.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --aoi_dir AOI_DIR, -a AOI_DIR
-                        Path to the directory of the AOI
-  --config CONFIG_FILE, -c CONFIG_FILE
-                        Path to config file
-
+cd foss4g-2023-traffic-speed-model/db-backup
+gunzip < preprocessed_2023-04-25_12_29_03.gz | docker exec -i db-traffic-speed-model psql -U postgres -d postgres`
 ```
 
-##### Config file
+#### Optional: Create a backup of the database 
 
-Executing the scripts requires a config file, e.g. [./config/config_sample.json](./config/config_sample.json)
+`docker exec -t db-traffic-speed-model pg_dumpall -c -U postgres | gzip > ./preprocessed_$(date +"%Y-%m-%d_%H_%M_%S").gz`
 
-```
-  "berlin": {
-    "timezone": "Europe/Berlin",
-    "output_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/extracted",
-    "twitter_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/twitter/tweet-data-grid-timebins-weekend",
-    "uber_dir": "/Users/chludwig/Development/sm2t/sm2t_centrality/data/uber"
-  }
-```
-
-```
-python ./traffic
-```
+### Running the analysis
 
 
-#### 2. [modelling.py](modelling.py)
+#### 1. Preprocessing (optional)
 
-```
-Train different models and compares them
+To reproduce the results of the paper this step is not necessary if you have [loaded the preprocessed data into the database](#load-preprocessed-data). This step only needs to be performed if you are using new data which is not yet in the database. 
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --aoi_dir AOI_DIR, -a AOI_DIR
-                        Path to the directory of the AOI
-  --config CONFIG_FILE, -c CONFIG_FILE
-                        Path to config file
-  --model MODEL_CONFIG_FILE, -m MODEL_CONFIG_FILE
-                        Path to model config file
-```
+#### 2. Train the models 
 
+Adjust the file paths in the config file [./config/config_aois_allcities](./config/config_aois_allcities). The model parameters are defined in [./config/modelling](./config/modelling). These do not have to be adjusted to reproduce the results. 
 
-#### 3. [prediction.py](prediction.py)
+**Example:** Run model training for Nairobi with target variabel 85th percentile traffic speed
 
-```
-usage: prediction.py [-h] --aoi_dir AOI_DIR --model MODEL_FILE
+`python ./modelling.py -a nairobi -c ../config/config_aois_allcities.json -m ../config/modelling/model_features_speed_kph_p85.json`
 
-Predict traffic speed for OSM highways
+If you want to run model training for several config files at once, you can use the batch file in [./traffic_speed_model/batch](./traffic_speed_model/batch).
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --aoi_dir AOI_DIR, -a AOI_DIR
-                        Path to the directory of the AOI
-  --model MODEL_FILE, - MODEL_FILE
-                        Path to model file (*.joblib)
-```
+`./batch_modelling.sh nairobi`
 
-###
+#### 3. Predict traffic speed
+
+To predict traffic speed for certain models run. Prediction will only be performed if the value `predict = True` in the modelling config file.
+
+`python ./prediction.py -a nairobi -c ../config/config_aois_allcities.json -m ../config/modelling/model_features_speed_kph_p85.json`
+
+If you want to run the prediction for several config files at once, you can use the batch file in [./traffic_speed_model/batch](./traffic_speed_model/batch).
+
+`./batch_prediction.sh nairobi`
+
+#### 4. Export traffic speed from database for openrouteservice 
+
+To export the predicted traffic speed data run: 
+
+`python ./export.py -a nairobi -t speed_kph_p85 -c ../config/config_aois_allcities.json`
+
+If you want to run the export for several config files at once, you can use the batch file in [./traffic_speed_model/batch](./traffic_speed_model/batch).
+
+`./batch_prediction.sh nairobi`
+
 
 ## License
 
