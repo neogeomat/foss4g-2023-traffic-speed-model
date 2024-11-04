@@ -6,7 +6,7 @@ C. Ludwig, J. Psotta, A. Buch, N. Kolaxidis, S. Fendrich, M. Zia, J. Fürle, A. 
 
 ## Dependencies
 
-- Python >= 3.10
+- Python >= 3.10, <3.12
 - poetry >=1.3.2
 - docker
 - gunzip
